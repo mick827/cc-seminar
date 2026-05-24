@@ -26,11 +26,11 @@
       --font-en-serif: "EB Garamond", Georgia, serif;
       --font-en-sans:  "Inter", system-ui, sans-serif;
 
-      --px: 80px;
-      --py: 52px;
-      --gap-sm: 16px;
-      --gap-md: 28px;
-      --gap-lg: 44px;
+      --px: 64px;
+      --py: 40px;
+      --gap-sm: 12px;
+      --gap-md: 22px;
+      --gap-lg: 34px;
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,11 +40,14 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-family: var(--font-jp-sans);
     }
 
     /* ─── Slide shell ─── */
-    .deck { position: absolute; width: 1280px; height: 720px; }
+    .deck { position: relative; width: 1280px; height: 800px; flex-shrink: 0; }
 
     .slide {
       position: absolute; inset: 0;
@@ -731,21 +734,21 @@
        Slide 10 — AI Team Directory
   ══════════════════════════════════════════════ -->
   <div class="slide">
-    <div class="body" style="gap:var(--gap-md);padding-top:36px;padding-bottom:20px;">
+    <div class="body" style="gap:10px;padding-top:20px;padding-bottom:10px;">
       <div>
-        <p style="font-family:var(--font-en-sans);font-size:15px;color:var(--olive-bright);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;">2026</p>
-        <h2 class="t-h2" style="margin-bottom:4px;">Claude Codeで一人起業</h2>
+        <p style="font-family:var(--font-en-sans);font-size:14px;color:var(--olive-bright);letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px;">2026</p>
+        <h2 class="t-h2" style="margin-bottom:2px;">Claude Codeで一人起業</h2>
         <p class="t-h3">AIチームをフォルダで作る</p>
       </div>
-      <div style="display:grid;grid-template-columns:3fr 2fr;gap:var(--gap-lg);flex:1;align-items:center;">
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div style="background:rgba(200,169,110,.15);border:2px solid var(--gold);border-radius:10px;padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:12px;">
-            <span style="font-size:clamp(20px,2.4vw,34px);">👤</span>
-            <span style="font-size:clamp(20px,2.4vw,34px);font-weight:700;color:var(--gold);">社長（あなた）</span>
-            <span style="font-size:clamp(14px,1.5vw,20px);color:var(--text-muted);">一人</span>
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:var(--gap-md);flex:1;align-items:center;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:rgba(200,169,110,.15);border:2px solid var(--gold);border-radius:10px;padding:10px 18px;display:flex;align-items:center;justify-content:center;gap:12px;">
+            <span style="font-size:clamp(18px,2.2vw,30px);">👤</span>
+            <span style="font-size:clamp(18px,2.2vw,30px);font-weight:700;color:var(--gold);">社長（あなた）</span>
+            <span style="font-size:clamp(13px,1.4vw,18px);color:var(--text-muted);">一人</span>
           </div>
-          <div style="text-align:center;color:var(--olive-bright);font-size:clamp(18px,2vw,28px);font-weight:700;">↓ 指示するだけ</div>
-          <div class="ftree" style="font-size:clamp(14px,1.6vw,22px);line-height:1.9;">📁 my-business/
+          <div style="text-align:center;color:var(--olive-bright);font-size:clamp(16px,1.8vw,24px);font-weight:700;">↓ 指示するだけ</div>
+          <div class="ftree" style="font-size:clamp(13px,1.4vw,19px);line-height:1.6;">📁 my-business/
 │
 ├── 📁 <span class="nf">秘書部門</span>
 │     メール返信・スケジュール調整
@@ -759,18 +762,18 @@
 └── 📁 <span class="nf">コンテンツ部門</span>
       note記事・メルマガ</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:18px 22px;text-align:center;">
-            <div style="font-size:clamp(18px,2.1vw,30px);font-weight:700;color:var(--gold);">フォルダ = 部署</div>
-            <div style="font-size:clamp(13px,1.4vw,19px);color:var(--text-muted);margin-top:6px;">フォルダごとに役割が決まる</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:12px 16px;text-align:center;">
+            <div style="font-size:clamp(16px,1.9vw,26px);font-weight:700;color:var(--gold);">フォルダ = 部署</div>
+            <div style="font-size:clamp(12px,1.3vw,17px);color:var(--text-muted);margin-top:4px;">フォルダごとに役割が決まる</div>
           </div>
-          <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:18px 22px;text-align:center;">
-            <div style="font-size:clamp(18px,2.1vw,30px);font-weight:700;color:var(--olive-bright);">スキル = 仕事マニュアル</div>
-            <div style="font-size:clamp(13px,1.4vw,19px);color:var(--text-muted);margin-top:6px;">何をするか覚えさせる</div>
+          <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:12px 16px;text-align:center;">
+            <div style="font-size:clamp(16px,1.9vw,26px);font-weight:700;color:var(--olive-bright);">スキル = 仕事マニュアル</div>
+            <div style="font-size:clamp(12px,1.3vw,17px);color:var(--text-muted);margin-top:4px;">何をするか覚えさせる</div>
           </div>
-          <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:18px 22px;text-align:center;">
-            <div style="font-size:clamp(18px,2.1vw,30px);font-weight:700;color:var(--accent-bright);">あなた = 社長</div>
-            <div style="font-size:clamp(13px,1.4vw,19px);color:var(--text-muted);margin-top:6px;">指示するだけでいい</div>
+          <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:12px 16px;text-align:center;">
+            <div style="font-size:clamp(16px,1.9vw,26px);font-weight:700;color:var(--accent-bright);">あなた = 社長</div>
+            <div style="font-size:clamp(12px,1.3vw,17px);color:var(--text-muted);margin-top:4px;">指示するだけでいい</div>
           </div>
         </div>
       </div>
@@ -1336,12 +1339,9 @@
 <script>
   function scaleDeck() {
     const deck = document.getElementById('deck');
-    const W = 1280, H = 720;
-    const scale = Math.min(window.innerWidth / W, window.innerHeight / H);
+    const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 800);
     deck.style.transform = `scale(${scale})`;
-    deck.style.transformOrigin = 'top left';
-    deck.style.left = `${(window.innerWidth  - W * scale) / 2}px`;
-    deck.style.top  = `${(window.innerHeight - H * scale) / 2}px`;
+    deck.style.transformOrigin = 'center center';
   }
   window.addEventListener('resize', scaleDeck);
   scaleDeck();
