@@ -1353,9 +1353,12 @@
     if (!inner || !body) return;
     inner.style.transform = '';
     inner.style.width = '100%';
-    const availH = body.clientHeight;
+    const cs = getComputedStyle(body);
+    const pT = parseFloat(cs.paddingTop) || 0;
+    const pB = parseFloat(cs.paddingBottom) || 0;
+    const availH = body.clientHeight - pT - pB;
     const naturalH = inner.scrollHeight;
-    if (naturalH > availH) {
+    if (naturalH > availH && naturalH > 0) {
       const scale = availH / naturalH;
       inner.style.transform = `scale(${scale})`;
       inner.style.transformOrigin = 'top left';
@@ -1364,7 +1367,11 @@
   }
   window.addEventListener('resize', autoFitSlide10);
   window.addEventListener('load', autoFitSlide10);
-  setTimeout(autoFitSlide10, 500);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(autoFitSlide10);
+  }
+  setTimeout(autoFitSlide10, 1000);
+  setTimeout(autoFitSlide10, 2500);
 
   const slides = document.querySelectorAll('.slide');
   let cur = 0;
@@ -1373,6 +1380,7 @@
     slides[cur].classList.remove('active');
     cur = (n + slides.length) % slides.length;
     slides[cur].classList.add('active');
+    if (cur === 9) requestAnimationFrame(autoFitSlide10);
   }
 
   document.addEventListener('keydown', e => {
