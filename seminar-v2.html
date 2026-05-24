@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Claude Code はじめの一歩</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --slide-bg:       #1A1410;
+      --slide-bg-alt:   #241C18;
+      --slide-surface:  #2E2420;
+      --slide-border:   #4A3830;
+      --text-primary:   #F7EFEA;
+      --text-secondary: #C9B8AE;
+      --text-muted:     #807178;
+      --accent:         #C8867E;
+      --accent-bright:  #E8A09A;
+      --olive-bright:   #7A8F68;
+      --gold:           #C8A96E;
+
+      --font-jp-serif: "Shippori Mincho", "BIZ UDPMincho", "游明朝", serif;
+      --font-jp-sans:  "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+      --font-en-serif: "EB Garamond", Georgia, serif;
+      --font-en-sans:  "Inter", system-ui, sans-serif;
+
+      --px: 64px;
+      --py: 40px;
+      --gap-sm: 12px;
+      --gap-md: 22px;
+      --gap-lg: 34px;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-jp-sans);
+    }
+
+    /* ─── Slide shell ─── */
+    .deck { position: relative; width: 1280px; height: 800px; flex-shrink: 0; }
+
+    .slide {
+      position: absolute; inset: 0;
+      background: var(--slide-bg);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 0.28s ease;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .slide.active { opacity: 1; pointer-events: auto; }
+
+    .body {
+      flex: 1;
+      padding: var(--py) var(--px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      flex-shrink: 0;
+      height: 44px;
+      background: rgba(0,0,0,.45);
+      border-top: .5px solid var(--slide-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--px);
+      font-size: 16px;
+      color: var(--text-muted);
+      font-family: var(--font-jp-sans);
+    }
+
+    /* ─── Typography ─── */
+    .t-h1 {
+      font-family: var(--font-jp-serif);
+      font-size: clamp(44px, 6vw, 84px);
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text-primary);
+    }
+    .t-h2 {
+      font-family: var(--font-jp-serif);
+      font-size: clamp(30px, 4.2vw, 62px);
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+    .t-h3 {
+      font-family: var(--font-jp-serif);
+      font-size: clamp(22px, 2.8vw, 42px);
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
+    .t-body  { font-size: clamp(20px, 2.3vw, 32px); line-height: 1.7; }
+    .t-small { font-size: clamp(16px, 1.7vw, 24px); color: var(--text-muted); }
+    .t-key {
+      font-size: clamp(22px, 2.8vw, 44px);
+      font-weight: 700;
+      font-family: var(--font-jp-sans);
+      color: var(--accent-bright);
+      text-align: center;
+      padding: 18px 32px;
+      border-top: 1px solid var(--slide-border);
+      border-bottom: 1px solid var(--slide-border);
+      letter-spacing: .04em;
+      line-height: 1.5;
+    }
+
+    .em-pink  { color: var(--accent-bright); font-weight: 700; }
+    .em-gold  { color: var(--gold); font-weight: 700; font-family: var(--font-en-serif); }
+    .em-olive { color: var(--olive-bright); font-weight: 600; }
+
+    /* ─── Badge ─── */
+    .badge {
+      display: inline-block;
+      font-family: var(--font-en-sans);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--olive-bright);
+      border: 1px solid var(--olive-bright);
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin: 4px 6px 4px 0;
+    }
+
+    /* ─── Compare grid ─── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap-md);
+    }
+    .box-before {
+      background: var(--slide-surface);
+      border: 1px solid var(--slide-border);
+      border-radius: 8px;
+      padding: 22px 24px;
+    }
+    .box-after {
+      background: rgba(184,115,107,.12);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 22px 24px;
+    }
+    .box-label {
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--slide-border);
+      color: var(--text-secondary);
+    }
+    .box-after .box-label { color: var(--accent-bright); border-bottom-color: var(--accent); }
+
+    .dot-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .dot-list li {
+      font-size: clamp(18px, 2.1vw, 30px);
+      color: var(--text-primary);
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.5;
+    }
+    .dot-list li::before { content: '·'; position: absolute; left: 0; color: var(--text-muted); }
+    .box-after .dot-list li::before { color: var(--accent); }
+
+    /* ─── Folder tree ─── */
+    .ftree {
+      font-family: var(--font-jp-sans);
+      font-size: clamp(16px, 1.9vw, 27px);
+      line-height: 1.85;
+      color: var(--text-secondary);
+      background: rgba(0,0,0,.3);
+      border-left: 3px solid var(--olive-bright);
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      white-space: pre;
+    }
+    .ftree .nf { color: var(--gold); }
+
+    /* ─── Flow ─── */
+    .flow { display: flex; flex-direction: column; gap: 6px; }
+    .flow-step {
+      background: var(--slide-surface);
+      border: 1px solid var(--slide-border);
+      border-radius: 8px;
+      padding: 13px 22px;
+      font-size: clamp(18px, 2.1vw, 30px);
+      color: var(--text-primary);
+    }
+    .flow-step.accent { background: rgba(184,115,107,.12); border-color: var(--accent); }
+    .flow-arrow {
+      color: var(--olive-bright);
+      font-size: clamp(20px, 2.4vw, 32px);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1;
+    }
+
+    /* ─── Number list ─── */
+    .n-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .n-list li { display: flex; align-items: flex-start; gap: 16px; }
+    .n-list .num {
+      font-family: var(--font-en-serif);
+      font-size: clamp(22px, 2.6vw, 38px);
+      font-weight: 700;
+      color: var(--gold);
+      flex-shrink: 0;
+      min-width: 36px;
+      line-height: 1.2;
+    }
+    .n-list .txt { font-size: clamp(20px, 2.3vw, 32px); line-height: 1.5; }
+
+    /* ─── Timetable ─── */
+    .timetable { display: flex; flex-direction: column; gap: 9px; }
+    .tt-row {
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--slide-surface);
+      border: 1px solid var(--slide-border);
+      border-radius: 8px;
+    }
+    .tt-row.hl { background: rgba(184,115,107,.12); border-color: var(--accent); }
+    .tt-num {
+      font-family: var(--font-en-serif);
+      font-size: clamp(20px, 2.4vw, 34px);
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+    }
+    .tt-title { font-size: clamp(18px, 2.2vw, 30px); font-weight: 700; color: var(--text-primary); }
+    .tt-sub   { font-size: clamp(15px, 1.6vw, 22px); color: var(--text-secondary); margin-top: 2px; }
+    .tt-time  {
+      font-family: var(--font-en-serif);
+      font-size: clamp(18px, 1.9vw, 27px);
+      color: var(--gold);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* ─── Category card ─── */
+    .cat-card {
+      background: var(--slide-surface);
+      border: 1px solid var(--slide-border);
+      border-radius: 8px;
+      padding: 18px 22px;
+    }
+    .cat-title {
+      font-size: clamp(18px, 2vw, 27px);
+      font-weight: 700;
+      color: var(--olive-bright);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--slide-border);
+    }
+    .cat-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .cat-list li { font-size: clamp(17px, 1.9vw, 26px); color: var(--text-primary); }
+
+    /* ─── Icon item ─── */
+    .icon-row { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+    .icon-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .icon-item img { width: 56px; height: 56px; }
+    .icon-item span { font-size: clamp(14px, 1.5vw, 20px); color: var(--text-secondary); }
+
+    /* ─── Summary list ─── */
+    .sum-list { display: flex; flex-direction: column; gap: 10px; }
+    .sum-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 13px 20px;
+      background: var(--slide-surface);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .sum-num {
+      font-family: var(--font-en-serif);
+      font-size: clamp(20px, 2.3vw, 30px);
+      font-weight: 700;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .sum-txt { font-size: clamp(18px, 2vw, 28px); line-height: 1.5; }
+
+    /* ─── Zone ─── */
+    .zone { padding: 18px 22px; border-radius: 8px; }
+    .zone-cloud { background: var(--slide-surface); border: 1px solid var(--slide-border); }
+    .zone-local { background: rgba(184,115,107,.12); border: 1px solid var(--accent); }
+    .zone-div {
+      text-align: center;
+      font-size: clamp(16px, 1.7vw, 22px);
+      color: var(--text-muted);
+      padding: 5px 0;
+      letter-spacing: .1em;
+    }
+
+    /* ─── Title slide deco ─── */
+    .deco {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .deco::before, .deco::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: rgba(200,134,126,.08);
+    }
+    .deco::before { left: 28%; }
+    .deco::after  { left: 72%; }
+
+    /* ─── Skill types slide ─── */
+    .card { background: var(--slide-surface); border-radius: 12px; padding: 18px; border: 1px solid var(--slide-border); display: flex; flex-direction: column; }
+    .card-label { font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 10px; padding: 4px 12px; border-radius: 20px; width: fit-content; }
+    .card-label.global  { color: var(--gold); background: rgba(200,169,110,.12); border: 1px solid rgba(200,169,110,.3); }
+    .card-label.project { color: var(--olive-bright); background: rgba(122,143,104,.12); border: 1px solid rgba(122,143,104,.3); }
+    .card-title { font-family: var(--font-jp-serif); font-size: clamp(17px,1.9vw,26px); font-weight: 700; margin-bottom: 6px; }
+    .card-desc  { font-size: clamp(13px,1.4vw,18px); color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; }
+    .diagram { background: rgba(0,0,0,.3); border-radius: 10px; padding: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,.05); }
+    .pc-box  { border: 2px solid var(--gold); border-radius: 8px; padding: 12px; position: relative; }
+    .pc-label{ position: absolute; top: -11px; left: 12px; background: var(--slide-surface); padding: 2px 10px; font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: .1em; border-radius: 4px; }
+    .pc-inside { display: flex; gap: 10px; align-items: flex-start; }
+    .skill-home { background: rgba(200,169,110,.15); border: 1px solid rgba(200,169,110,.4); border-radius: 6px; padding: 8px 12px; flex-shrink: 0; }
+    .skill-home-title { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 5px; letter-spacing: .08em; }
+    .skill-file { font-size: 12px; color: var(--text-secondary); line-height: 1.9; }
+    .arrows-out { display: flex; flex-direction: column; gap: 5px; padding-top: 4px; }
+    .arrow-row  { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+    .arrow-row .ar { color: var(--gold); font-size: 14px; }
+    .folder-chip { background: rgba(255,255,255,.06); border: 1px solid var(--slide-border); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: var(--text-muted); }
+    .proj-box  { border: 2px solid var(--olive-bright); border-radius: 8px; padding: 12px; position: relative; }
+    .proj-label{ position: absolute; top: -11px; left: 12px; background: var(--slide-surface); padding: 2px 10px; font-size: 11px; color: var(--olive-bright); font-weight: 700; letter-spacing: .1em; border-radius: 4px; }
+    .proj-folder { border: 1px solid rgba(122,143,104,.5); border-radius: 6px; padding: 8px 12px; margin-bottom: 6px; }
+    .proj-folder-name { font-size: 13px; font-weight: 700; color: var(--olive-bright); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .proj-inner { display: flex; gap: 8px; flex-wrap: wrap; }
+    .proj-inner-folder { background: rgba(122,143,104,.15); border: 1px solid rgba(122,143,104,.35); border-radius: 4px; padding: 5px 8px; }
+    .proj-inner-folder-title { font-size: 10px; color: var(--olive-bright); font-weight: 700; margin-bottom: 4px; letter-spacing: .08em; }
+    .proj-inner-file { font-size: 11px; color: var(--text-secondary); line-height: 1.8; }
+    .proj-note { font-size: 11px; color: var(--text-muted); text-align: center; }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .feature-list li { font-size: clamp(13px,1.4vw,18px); color: var(--text-secondary); display: flex; align-items: flex-start; gap: 8px; line-height: 1.6; }
+    .feature-list li .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+    .dot.gold  { background: var(--gold); }
+    .dot.olive { background: var(--olive-bright); }
+    .guide-box { background: var(--slide-surface); border: 1px solid var(--slide-border); border-radius: 10px; padding: 16px 20px; }
+    .guide-title { font-family: var(--font-jp-serif); font-size: clamp(15px,1.7vw,22px); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+    .guide-title::before { content: ''; width: 4px; height: 16px; background: var(--accent); border-radius: 2px; }
+    .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .guide-item { background: rgba(0,0,0,.2); border-radius: 8px; padding: 10px 14px; border-left: 3px solid; }
+    .guide-item.global  { border-color: var(--gold); }
+    .guide-item.project { border-color: var(--olive-bright); }
+    .guide-item-title { font-size: clamp(13px,1.4vw,18px); font-weight: 700; margin-bottom: 5px; }
+    .guide-item.global  .guide-item-title { color: var(--gold); }
+    .guide-item.project .guide-item-title { color: var(--olive-bright); }
+    .guide-item-text { font-size: clamp(12px,1.3vw,16px); color: var(--text-secondary); line-height: 1.7; }
+    .cmd-box { background: var(--slide-surface); border: 1px solid var(--slide-border); border-radius: 10px; padding: 16px 20px; }
+    .cmd-title { font-family: var(--font-jp-serif); font-size: clamp(15px,1.7vw,22px); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+    .cmd-title::before { content: ''; width: 4px; height: 16px; background: var(--olive-bright); border-radius: 2px; }
+    .cmd-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cmd-item { background: rgba(0,0,0,.3); border-radius: 8px; padding: 12px 14px; }
+    .cmd-item-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; margin-bottom: 8px; }
+    .cmd-item.global  .cmd-item-label { color: var(--gold); }
+    .cmd-item.project .cmd-item-label { color: var(--olive-bright); }
+    .cmd-code { font-family: var(--font-jp-sans); font-size: clamp(13px,1.4vw,18px); color: var(--text-primary); line-height: 1.9; background: rgba(0,0,0,.2); padding: 10px 12px; border-radius: 6px; border-left: 2px solid var(--slide-border); }
+    .cmd-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+    .skill-summary { margin-top: 14px; padding: 14px 18px; background: rgba(232,160,154,.08); border: 1px solid rgba(232,160,154,.25); border-radius: 8px; text-align: center; font-size: clamp(14px,1.5vw,20px); color: var(--accent-bright); font-weight: 700; line-height: 1.7; }
+
+    /* ─── Case badge ─── */
+    .case-badge {
+      display: inline-block;
+      font-family: var(--font-jp-sans);
+      font-size: clamp(14px, 1.5vw, 20px);
+      font-weight: 700;
+      color: var(--accent-bright);
+      border: 1px solid var(--accent);
+      padding: 4px 18px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    /* ─── Horizontal flow ─── */
+    .hflow { display: flex; align-items: stretch; gap: 0; }
+    .hflow-step {
+      flex: 1;
+      background: var(--slide-surface);
+      border: 1px solid var(--slide-border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: clamp(16px, 1.9vw, 26px);
+      color: var(--text-primary);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .hflow-step .step-num {
+      font-family: var(--font-en-serif);
+      font-size: clamp(12px, 1.3vw, 18px);
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: .1em;
+    }
+    .hflow-arrow {
+      color: var(--olive-bright);
+      font-size: clamp(22px, 2.6vw, 36px);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+
+    /* ─── Example cards ─── */
+    .ex-card {
+      background: var(--slide-surface);
+      border: 1px solid var(--slide-border);
+      border-radius: 8px;
+      padding: 20px 22px;
+    }
+    .ex-card.accent { background: rgba(184,115,107,.10); border-color: var(--accent); }
+    .ex-card-title {
+      font-family: var(--font-jp-serif);
+      font-size: clamp(20px, 2.3vw, 32px);
+      font-weight: 700;
+      color: var(--accent-bright);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--accent);
+    }
+    .ex-card-title.olive { color: var(--olive-bright); border-bottom-color: var(--olive-bright); }
+
+    /* ─── Misc ─── */
+    .spacer { flex: 1; }
+    .mt-sm { margin-top: var(--gap-sm); }
+    .mt-md { margin-top: var(--gap-md); }
+    .mt-lg { margin-top: var(--gap-lg); }
+    .mb-sm { margin-bottom: var(--gap-sm); }
+    .mb-md { margin-bottom: var(--gap-md); }
+    .sep { height: 1px; background: var(--slide-border); }
+  </style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════════════════════
+       Slide 1 — Title
+  ══════════════════════════════════════════════ -->
+  <div class="slide active">
+    <div class="deco"></div>
+    <div class="body" style="align-items:center;justify-content:center;text-align:center;gap:var(--gap-lg);">
+      <div>
+        <p style="font-size:16px;color:var(--olive-bright);letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;font-family:var(--font-en-sans);">SEMINAR</p>
+        <h1 class="t-h1" style="font-size:clamp(48px,6.5vw,90px);margin-bottom:22px;">Claude Code はじめの一歩</h1>
+        <p class="t-h3" style="font-size:clamp(22px,2.6vw,38px);">〜あなたの仕事を覚えるAIを使いこなす〜</p>
+      </div>
+      <div style="border-top:1px solid var(--slide-border);padding-top:28px;width:360px;">
+        <p style="font-size:clamp(18px,2vw,26px);color:var(--text-secondary);">講師：<span style="color:var(--text-primary);font-weight:700;font-size:clamp(20px,2.3vw,30px);">Miki</span></p>
+      </div>
+    </div>
+    <footer><span>1 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 2 — Self-introduction
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <h2 class="t-h2 mb-md">自己紹介</h2>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:var(--gap-lg);align-items:start;flex:1;overflow:hidden;">
+        <!-- Photo -->
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+          <img src="./自己紹介写真.png" alt="Miki" style="width:100%;max-width:260px;border-radius:8px;border:1px solid var(--slide-border);display:block;">
+        </div>
+        <!-- Text -->
+        <div style="display:flex;flex-direction:column;gap:var(--gap-sm);">
+          <div>
+            <h3 style="font-family:var(--font-jp-serif);font-size:clamp(26px,3vw,44px);font-weight:700;color:var(--text-primary);margin-bottom:10px;">Miki（みき）</h3>
+            <div style="margin-bottom:14px;">
+              <span class="badge">静岡県藤枝市 il Buco マダム・ソムリエ</span>
+              <span class="badge">AIコンサルタント</span>
+            </div>
+          </div>
+          <ul class="dot-list">
+            <li>飲食業界20年（NY・イタリア修行）</li>
+            <li>東京で飲食店開業立ち上げに携わり、料理人の夫と独立して<span class="em-pink">10年目</span></li>
+            <li>中学生の娘の母　／　家事・育児・店舗業務の両立に苦戦</li>
+            <li>AI活用で効率化を実践中　／　店舗経営者向けAI活用サポート</li>
+            <li>藤枝市DXセミナー講師（昨年）　Claude Codeは今年から使用開始</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <footer><span>2 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 3 — Seminar goals
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-lg);">
+      <div>
+        <h2 class="t-h2 mb-sm">このセミナーで得られること</h2>
+        <p class="t-h3">セミナー終了時、あなたは…</p>
+      </div>
+      <ul class="n-list" style="gap:var(--gap-md);flex:1;justify-content:center;display:flex;flex-direction:column;">
+        <li>
+          <span class="num">1</span>
+          <div class="txt" style="font-size:clamp(22px,2.6vw,36px);">Claude Codeが仕事をどう変えるかを<span class="em-pink">理解している</span></div>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <div class="txt" style="font-size:clamp(22px,2.6vw,36px);">スキルの作り方が<span class="em-pink">わかっている</span></div>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <div class="txt" style="font-size:clamp(22px,2.6vw,36px);">自動で動く仕組みを<span class="em-pink">使える状態になっている</span></div>
+        </li>
+      </ul>
+    </div>
+    <footer><span>3 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 4 — Agenda
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <h2 class="t-h2 mb-sm">今日の流れ</h2>
+      <div class="timetable" style="flex:1;justify-content:center;display:flex;flex-direction:column;">
+        <div class="tt-row">
+          <span class="tt-num">1</span>
+          <div><div class="tt-title">Claude Codeとは？</div><div class="tt-sub">〜AIエージェントが仕事を変える〜</div></div>
+        </div>
+        <div class="tt-row">
+          <span class="tt-num">2</span>
+          <div><div class="tt-title">事例紹介</div><div class="tt-sub">〜活用例〜</div></div>
+        </div>
+        <div class="tt-row">
+          <span class="tt-num">3</span>
+          <div><div class="tt-title">導入方法</div><div class="tt-sub">〜セットアップを完了させる〜</div></div>
+        </div>
+        <div class="tt-row hl">
+          <span class="tt-num">4</span>
+          <div><div class="tt-title" style="color:var(--accent-bright);">ハンズオン</div><div class="tt-sub">〜Threadsの自動投稿作成〜</div></div>
+        </div>
+        <div class="tt-row">
+          <span class="tt-num">5</span>
+          <div><div class="tt-title">まとめ・Q&amp;A</div><div class="tt-sub">〜明日からの活用へ〜</div></div>
+        </div>
+      </div>
+    </div>
+    <footer><span>4 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 5 — 5 features overview
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <div>
+        <h2 class="t-h2 mb-sm">Claude Codeとは？</h2>
+        <p class="t-h3 mb-md">5つの特徴</p>
+      </div>
+      <ul class="n-list" style="flex:1;justify-content:center;display:flex;flex-direction:column;">
+        <li>
+          <span class="num">1</span>
+          <div class="txt"><span class="em-pink">Chat型ではなくエージェント</span> <span style="color:var(--text-secondary);">→ 指示するだけで、自分でやってくれる</span></div>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <div class="txt"><span class="em-pink">ローカルで動く</span> <span style="color:var(--text-secondary);">→ 自分のPCの中で作業する</span></div>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <div class="txt"><span class="em-pink">フォルダの中で作業する</span> <span style="color:var(--text-secondary);">→ ファイルを読んで・作って・保存する</span></div>
+        </li>
+        <li>
+          <span class="num">4</span>
+          <div class="txt"><span class="em-pink">他のツールと連携できる</span> <span style="color:var(--text-secondary);">→ GmailやNotionなど外部と繋がる</span></div>
+        </li>
+        <li>
+          <span class="num">5</span>
+          <div class="txt"><span class="em-pink">スキルを作って自動化できる</span> <span style="color:var(--text-secondary);">→ 一度教えれば毎回同じことをやってくれる</span></div>
+        </li>
+      </ul>
+      <p class="t-small" style="text-align:right;">それぞれ詳しく見ていきましょう</p>
+    </div>
+    <footer><span>5 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 6 — Feature 1: Agent
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <h2 class="t-h2 mb-sm">① Chat型ではなくエージェント</h2>
+      <div class="compare-grid" style="flex:1;align-items:stretch;">
+        <div class="box-before">
+          <div class="box-label">今までのChat型AI</div>
+          <ul class="dot-list">
+            <li>質問して答えをもらう</li>
+            <li>自分でコピペして使う</li>
+            <li>毎回同じ説明をする</li>
+            <li>作業は自分でやる</li>
+          </ul>
+        </div>
+        <div class="box-after">
+          <div class="box-label">Claude Code</div>
+          <ul class="dot-list">
+            <li>指示するだけで動く</li>
+            <li>ファイルを作って保存まで</li>
+            <li>覚えていてくれる</li>
+            <li>作業を全部やってくれる</li>
+          </ul>
+        </div>
+      </div>
+      <div class="t-key">エージェント＝自分でやってくれるAI</div>
+    </div>
+    <footer><span>6 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 7 — Feature 2: Local
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <h2 class="t-h2 mb-sm">② ローカルで動く</h2>
+      <div style="display:flex;flex-direction:column;gap:10px;flex:1;justify-content:center;">
+        <div class="zone zone-cloud">
+          <p style="font-size:clamp(19px,2.2vw,28px);color:var(--olive-bright);font-weight:700;margin-bottom:7px;">🌐 インターネットの世界（クラウド）</p>
+          <p style="font-size:clamp(19px,2.2vw,28px);color:var(--text-secondary);">今までのChat型AI　—　データはネットの向こうへ</p>
+        </div>
+        <div class="zone-div">──────────────── ここに壁がある ────────────────</div>
+        <div class="zone zone-local">
+          <p style="font-size:clamp(19px,2.2vw,28px);color:var(--accent-bright);font-weight:700;margin-bottom:7px;">💻 あなたのパソコンの中（ローカル）</p>
+          <p style="font-size:clamp(19px,2.2vw,28px);color:var(--text-primary);margin-bottom:5px;font-weight:600;">Claude Code</p>
+          <p style="font-size:clamp(19px,2.2vw,28px);color:var(--text-secondary);">ファイルはそのまま手元に残る　—　データが外に出ない <span class="em-pink">→ 安心</span></p>
+        </div>
+      </div>
+      <div class="t-key">ローカル＝あなたのPCの中で動く</div>
+    </div>
+    <footer><span>7 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 8 — Feature 3: Folder (5 steps)
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:8px;padding-top:28px;padding-bottom:20px;">
+      <h2 class="t-h2" style="margin-bottom:6px;">③ フォルダの中で作業する</h2>
+      <div class="flow" style="flex:1;justify-content:center;display:flex;flex-direction:column;gap:4px;">
+        <div class="flow-step" style="padding:9px 20px;">
+          <span class="em-gold">①</span> フォルダを作る
+          <div class="ftree" style="margin-top:5px;font-size:clamp(15px,1.6vw,22px);padding:8px 14px;line-height:1.6;">📁 my-folder</div>
+        </div>
+        <div class="flow-arrow" style="font-size:clamp(16px,1.8vw,24px);">↓</div>
+        <div class="flow-step" style="padding:9px 20px;">
+          <span class="em-gold">②</span> ファイルを入れる
+          <div class="ftree" style="margin-top:5px;font-size:clamp(15px,1.6vw,22px);padding:8px 14px;line-height:1.6;">📁 my-folder
+├── 📄 メール.txt
+└── 📄 メモ.txt</div>
+        </div>
+        <div class="flow-arrow" style="font-size:clamp(16px,1.8vw,24px);">↓</div>
+        <div class="flow-step" style="padding:9px 20px;"><span class="em-gold">③</span>「このフォルダで作業して」と頼む</div>
+        <div class="flow-arrow" style="font-size:clamp(16px,1.8vw,24px);">↓</div>
+        <div class="flow-step" style="padding:9px 20px;"><span class="em-gold">④</span> Claudeがフォルダの中で作業</div>
+        <div class="flow-arrow" style="font-size:clamp(16px,1.8vw,24px);">↓</div>
+        <div class="flow-step" style="padding:9px 20px;">
+          <span class="em-gold">⑤</span> 結果のファイルが自動で保存される
+          <div class="ftree" style="margin-top:5px;font-size:clamp(15px,1.6vw,22px);padding:8px 14px;line-height:1.6;"><span class="nf">📄 返信.txt ✨
+📄 まとめ.txt ✨</span></div>
+        </div>
+      </div>
+    </div>
+    <footer><span>8 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 9 — Folder content = output
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:14px;padding-top:30px;padding-bottom:20px;">
+      <div>
+        <h2 class="t-h2" style="margin-bottom:4px;">フォルダの中身がアウトプットを決める</h2>
+        <p class="t-h3" style="margin-bottom:0;">あなたのフォルダだから、あなたらしい結果になる</p>
+      </div>
+      <div class="compare-grid" style="flex:1;align-items:start;">
+        <div class="box-before" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="box-label">個人事業主・発信者</div>
+          <div class="ftree" style="font-size:clamp(15px,1.6vw,22px);padding:8px 14px;line-height:1.7;">📁 私のコンテンツ用
+├── 📄 自己紹介.txt
+├── 📁 過去の投稿/
+├── 📄 文体メモ.txt
+└── 📄 指示書.md</div>
+          <div style="text-align:center;color:var(--olive-bright);font-size:clamp(16px,1.8vw,24px);">↓</div>
+          <div style="padding:9px 14px;background:rgba(122,143,104,.1);border-radius:6px;border:1px solid var(--olive-bright);font-size:clamp(16px,1.8vw,24px);color:var(--text-primary);">「あなたらしい」SNS投稿文が出てくる</div>
+        </div>
+        <div class="box-after" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="box-label">製造業の会社</div>
+          <div class="ftree" style="font-size:clamp(15px,1.6vw,22px);padding:8px 14px;line-height:1.7;">📁 会社の業務用
+├── 📄 製品リスト.txt
+├── 📄 会社案内.txt
+├── 📁 過去のメール/
+└── 📄 指示書.md</div>
+          <div style="text-align:center;color:var(--accent-bright);font-size:clamp(16px,1.8vw,24px);">↓</div>
+          <div style="padding:9px 14px;background:rgba(200,134,126,.15);border-radius:6px;border:1px solid var(--accent);font-size:clamp(16px,1.8vw,24px);color:var(--text-primary);">「自社の言葉で書かれた」見積書・メールが出てくる</div>
+        </div>
+      </div>
+      <div class="t-key">同じClaude Codeでも、フォルダの中身次第で結果が変わる</div>
+    </div>
+    <footer><span>9 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 10 — AI Team Directory
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="padding:16px 64px 8px 64px;overflow:hidden;">
+      <div id="s10-content" style="display:flex;flex-direction:column;gap:8px;transform-origin:top left;width:100%;">
+        <div>
+          <p style="font-family:var(--font-en-sans);font-size:13px;color:var(--olive-bright);letter-spacing:.2em;text-transform:uppercase;margin-bottom:2px;">2026</p>
+          <h2 class="t-h2" style="margin-bottom:2px;font-size:36px;line-height:1.2;">Claude Codeで一人起業</h2>
+          <p class="t-h3" style="font-size:22px;line-height:1.3;">AIチームをフォルダで作る</p>
+        </div>
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:20px;flex:1;min-height:0;align-items:center;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="background:rgba(200,169,110,.15);border:2px solid var(--gold);border-radius:10px;padding:8px 18px;display:flex;align-items:center;justify-content:center;gap:12px;">
+              <span style="font-size:24px;">👤</span>
+              <span style="font-size:24px;font-weight:700;color:var(--gold);">社長（あなた）</span>
+              <span style="font-size:16px;color:var(--text-muted);">一人</span>
+            </div>
+            <div style="text-align:center;color:var(--olive-bright);font-size:18px;font-weight:700;">↓ 指示するだけ</div>
+            <div class="ftree" style="font-size:14px;line-height:1.5;">📁 my-business/
+├── 📁 <span class="nf">秘書部門</span>
+│     メール返信・スケジュール調整
+├── 📁 <span class="nf">マーケ部門</span>
+│     SNS投稿・LP作成
+├── 📁 <span class="nf">経理部門</span>
+│     原価計算・請求書作成
+└── 📁 <span class="nf">コンテンツ部門</span>
+      note記事・メルマガ</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:10px 14px;text-align:center;">
+              <div style="font-size:20px;font-weight:700;color:var(--gold);">フォルダ = 部署</div>
+              <div style="font-size:14px;color:var(--text-muted);margin-top:3px;">フォルダごとに役割が決まる</div>
+            </div>
+            <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:10px 14px;text-align:center;">
+              <div style="font-size:20px;font-weight:700;color:var(--olive-bright);">スキル = 仕事マニュアル</div>
+              <div style="font-size:14px;color:var(--text-muted);margin-top:3px;">何をするか覚えさせる</div>
+            </div>
+            <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:10px;padding:10px 14px;text-align:center;">
+              <div style="font-size:20px;font-weight:700;color:var(--accent-bright);">あなた = 社長</div>
+              <div style="font-size:14px;color:var(--text-muted);margin-top:3px;">指示するだけでいい</div>
+            </div>
+          </div>
+        </div>
+        <div class="t-key" style="font-size:22px;padding:8px 32px;flex-shrink:0;">一人なのに、チームで動いている</div>
+      </div>
+    </div>
+    <footer><span>10 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 11 — Feature 4: Integrations
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <h2 class="t-h2 mb-sm">④ 他のツールと連携できる</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-md);flex:1;align-content:start;">
+        <div class="cat-card">
+          <div class="cat-title">【メール・カレンダー】</div>
+          <div class="icon-row">
+            <div class="icon-item">
+              <img src="https://cdn.simpleicons.org/gmail/ffffff" alt="Gmail">
+              <span>Gmail</span>
+            </div>
+            <div class="icon-item">
+              <img src="https://cdn.simpleicons.org/googlecalendar/ffffff" alt="Google Calendar">
+              <span>Google Calendar</span>
+            </div>
+          </div>
+        </div>
+        <div class="cat-card">
+          <div class="cat-title">【ファイル・ノート】</div>
+          <div class="icon-row">
+            <div class="icon-item">
+              <img src="https://cdn.simpleicons.org/googledrive/ffffff" alt="Google Drive">
+              <span>Google Drive</span>
+            </div>
+            <div class="icon-item">
+              <img src="https://cdn.simpleicons.org/notion/ffffff" alt="Notion">
+              <span>Notion</span>
+            </div>
+            <div class="icon-item">
+              <img src="https://cdn.simpleicons.org/obsidian/ffffff" alt="Obsidian">
+              <span>Obsidian</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="t-key">Claude Codeは単体ではなく、あなたの仕事環境全体と繋がれる</div>
+      <p class="t-small" style="margin-top:8px;">※ 外部連携のセキュリティ設定については別途資料をご用意しています。本日のセミナー後にご確認ください。</p>
+    </div>
+    <footer><span>11 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 11 — Feature 5: Skills & Automation
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <h2 class="t-h2 mb-sm">⑤ スキルを作って自動化できる</h2>
+      <div style="display:flex;flex-direction:column;gap:var(--gap-md);flex:1;justify-content:center;">
+        <div class="box-before" style="padding:22px 26px;">
+          <h3 style="font-family:var(--font-jp-serif);font-size:clamp(21px,2.4vw,34px);font-weight:600;color:var(--accent-bright);margin-bottom:10px;">スキル＝作業の指示書</h3>
+          <ul class="dot-list">
+            <li>一度作っておけば「メール作って」のひと言で</li>
+            <li>1〜10の作業を全部やってくれる</li>
+          </ul>
+        </div>
+        <div style="text-align:center;color:var(--olive-bright);font-size:clamp(21px,2.3vw,30px);font-weight:700;">↓　さらに</div>
+        <div class="box-after" style="padding:22px 26px;">
+          <h3 style="font-family:var(--font-jp-serif);font-size:clamp(21px,2.4vw,34px);font-weight:600;color:var(--accent-bright);margin-bottom:10px;">Coworkで時間を決めれば</h3>
+          <ul class="dot-list">
+            <li>毎朝決まった時間に自動で動いてくれる</li>
+          </ul>
+        </div>
+      </div>
+      <div class="t-key">一度作れば、あとは勝手に動く</div>
+      <p class="t-small" style="margin-top:8px;">※ ハンズオンで実際に作ります</p>
+    </div>
+    <footer><span>12 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 12 — What can you do?
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <div>
+        <h2 class="t-h2 mb-sm">Claude Codeでできること</h2>
+        <p class="t-h3 mb-md">詳しくは次の活用例で</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap-md);flex:1;align-content:start;">
+        <div class="cat-card">
+          <div class="cat-title">【発信・コンテンツ系】</div>
+          <ul class="cat-list">
+            <li>📱 SNS投稿文を自動作成</li>
+            <li>🌐 LPを作ってネット公開</li>
+            <li>📧 メルマガを一括生成</li>
+          </ul>
+        </div>
+        <div class="cat-card">
+          <div class="cat-title">【業務効率化系】</div>
+          <ul class="cat-list">
+            <li>📧 メール返信を自動作成</li>
+            <li>📊 Excelファイルを自動作成</li>
+            <li>📁 大量ファイルの整理・変換</li>
+          </ul>
+        </div>
+        <div class="cat-card">
+          <div class="cat-title">【アプリ・ツール作成系】</div>
+          <ul class="cat-list">
+            <li>📊 データ分析ツールを作る</li>
+            <li>💰 家計簿アプリを作る</li>
+            <li>📦 在庫管理ツールを作る</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <footer><span>13 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 14 — Part 2 Title
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="deco"></div>
+    <div class="body" style="align-items:center;justify-content:center;text-align:center;gap:var(--gap-lg);">
+      <div>
+        <p style="font-family:var(--font-en-sans);font-size:16px;color:var(--olive-bright);letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;">PART 2</p>
+        <h1 class="t-h1" style="font-size:clamp(42px,5.5vw,78px);margin-bottom:22px;">事例紹介</h1>
+        <p class="t-h3" style="font-size:clamp(22px,2.6vw,38px);">〜活用例〜</p>
+      </div>
+    </div>
+    <footer><span>14 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 13 — 事例① アプリ開発
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);padding-top:36px;padding-bottom:20px;">
+      <div>
+        <div class="case-badge">事例①</div>
+        <h2 class="t-h2" style="margin-bottom:4px;">アプリ開発</h2>
+        <p class="t-h3">家計簿アプリ・原価計算アプリ</p>
+      </div>
+      <div class="hflow" style="flex-shrink:0;">
+        <div class="hflow-step">
+          <span class="step-num">STEP 1</span>
+          <span>チャット型Claudeで<br>要件定義書を作成</span>
+        </div>
+        <div class="hflow-arrow">→</div>
+        <div class="hflow-step">
+          <span class="step-num">STEP 2</span>
+          <span>要件定義書を<br>Claude Codeに渡す</span>
+        </div>
+        <div class="hflow-arrow">→</div>
+        <div class="hflow-step" style="background:rgba(184,115,107,.12);border-color:var(--accent);">
+          <span class="step-num" style="color:var(--accent-bright);">COMPLETE</span>
+          <span style="color:var(--accent-bright);font-weight:700;">アプリが完成</span>
+        </div>
+      </div>
+      <div class="compare-grid" style="flex:1;align-items:stretch;">
+        <div class="ex-card">
+          <div class="ex-card-title olive">💰 家計簿アプリ</div>
+          <ul class="dot-list">
+            <li>収入・支出の記録ができる</li>
+            <li>カテゴリ別に分類される</li>
+            <li>月別グラフで可視化</li>
+            <li>ブラウザで動作するHTMLアプリ</li>
+          </ul>
+        </div>
+        <div class="ex-card accent">
+          <div class="ex-card-title">📊 原価計算アプリ</div>
+          <ul class="dot-list">
+            <li>食材の原価を入力するだけ</li>
+            <li>原価率を自動計算</li>
+            <li>メニューごとの利益を表示</li>
+            <li>飲食店オーナーに最適</li>
+          </ul>
+        </div>
+      </div>
+      <div class="t-key">プログラミング知識ゼロでも　アプリが作れる</div>
+    </div>
+    <footer><span>15 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 14 — 事例② LP・スライド作成
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);padding-top:36px;padding-bottom:20px;">
+      <div>
+        <div class="case-badge">事例②</div>
+        <h2 class="t-h2" style="margin-bottom:4px;">LP・スライド作成</h2>
+        <p class="t-h3">ファイルを読み込ませるだけで完成</p>
+      </div>
+      <div class="compare-grid" style="flex:1;align-items:start;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="ftree" style="font-size:clamp(15px,1.7vw,24px);line-height:1.9;">📁 lp-project/
+├── 📄 product.txt
+│   └── 商品の詳細・特徴・価格
+├── 📄 profile.txt
+│   └── プロフィール・実績
+├── 📄 target.txt
+│   └── ターゲット顧客・悩み
+└── 📄 design-token.md
+    └── 色・フォント・世界観</div>
+          <div style="text-align:center;font-size:clamp(20px,2.3vw,30px);font-weight:700;color:var(--olive-bright);">↓ Claude Codeに渡すだけ</div>
+          <div style="background:rgba(122,143,104,.1);border:1px solid var(--olive-bright);border-radius:8px;padding:14px 18px;font-size:clamp(16px,1.8vw,24px);color:var(--text-primary);font-weight:600;text-align:center;">HTMLで完成 → そのまま公開できる</div>
+        </div>
+        <div class="box-after" style="height:100%;display:flex;flex-direction:column;gap:12px;">
+          <div class="box-label">アウトプット</div>
+          <ul class="dot-list" style="flex:1;">
+            <li>文章もレイアウトも自動生成</li>
+            <li>デザインの詳細を入れると<br><span class="em-pink">AIっぽくないオリジナルデザインに</span></li>
+            <li>HTMLで完成してすぐ公開できる</li>
+          </ul>
+          <div style="padding:12px 16px;background:rgba(200,134,126,.2);border-radius:6px;border-left:3px solid var(--accent-bright);font-size:clamp(15px,1.7vw,22px);color:var(--text-secondary);line-height:1.6;">
+            ✨ このセミナースライドも<br>Claude Codeで作成しました
+          </div>
+        </div>
+      </div>
+      <div class="t-key">入れる情報が多いほど、あなたらしいLPになる</div>
+    </div>
+    <footer><span>16 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 15 — 事例③ トレーサビリティ管理
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);padding-top:36px;padding-bottom:20px;">
+      <div>
+        <div class="case-badge">事例③</div>
+        <h2 class="t-h2" style="margin-bottom:4px;">製造業のトレーサビリティ管理</h2>
+        <p class="t-h3">タイムスタンプの自動付与×記録追跡</p>
+      </div>
+      <div class="compare-grid" style="flex:1;align-items:start;">
+        <div class="box-before">
+          <div class="box-label">今まで</div>
+          <ul class="dot-list">
+            <li>📋 各工程を紙やExcelに手入力</li>
+            <li>⏰ 日時も毎回手動で記入</li>
+            <li>🔍「あのロットいつ作った？」に時間がかかる</li>
+            <li>🚨 問題発生時の追跡に何時間もかかる</li>
+          </ul>
+        </div>
+        <div class="box-after">
+          <div class="box-label">Claude Code</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <p style="font-size:clamp(17px,1.9vw,25px);color:var(--olive-bright);font-weight:700;margin-bottom:4px;">Step 1　作業内容だけ入力</p>
+              <p style="font-size:clamp(17px,1.8vw,24px);color:var(--text-secondary);">「煮熟完了 温度98℃ 90分」→ 日時が自動でつく（タイムスタンプ自動付与）</p>
+            </div>
+            <div>
+              <p style="font-size:clamp(17px,1.9vw,25px);color:var(--olive-bright);font-weight:700;margin-bottom:4px;">Step 2　履歴を一覧表示</p>
+              <p style="font-size:clamp(17px,1.8vw,24px);color:var(--text-secondary);">「ロットA-2501の履歴を見せて」→ 全工程が時系列で一覧表示</p>
+            </div>
+            <div>
+              <p style="font-size:clamp(17px,1.9vw,25px);color:var(--olive-bright);font-weight:700;margin-bottom:4px;">Step 3　影響ロットを即時リストアップ</p>
+              <p style="font-size:clamp(17px,1.8vw,24px);color:var(--text-secondary);">「焼津入荷の原料を使ったロットを全部出して」→ 影響ロットが一瞬でリストアップ</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="t-key">何時間もかかっていた追跡作業が、一言で終わる</div>
+    </div>
+    <footer><span>17 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 16 — 事例④ Threads投稿の自動化
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);padding-top:36px;padding-bottom:20px;">
+      <div>
+        <div class="case-badge">事例④</div>
+        <h2 class="t-h2" style="margin-bottom:4px;">Threads投稿の自動化</h2>
+        <p class="t-h3">第2の脳×スキル×自動化の集大成</p>
+      </div>
+      <div class="flow" style="flex:1;justify-content:center;display:flex;flex-direction:column;">
+        <div class="flow-step">
+          <span style="font-size:clamp(21px,2.3vw,30px);">📓 <strong>Obsidian・Supermemory</strong></span>
+          <p style="font-size:clamp(17px,1.9vw,25px);color:var(--text-secondary);margin-top:4px;">日々の体験・考えを蓄積（＝第2の脳）</p>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <span style="font-size:clamp(21px,2.3vw,30px);">📄 <strong>Threads投稿スキルが文章を作成</strong></span>
+          <p style="font-size:clamp(17px,1.9vw,25px);color:var(--text-secondary);margin-top:4px;">自分の文体・体験を反映（＝チームメンバー）</p>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <span style="font-size:clamp(21px,2.3vw,30px);">⚙️ <strong>Coworkが毎朝自動で実行</strong></span>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step accent">
+          <span style="font-size:clamp(21px,2.3vw,30px);color:var(--accent-bright);">📱 <strong>自分らしいThreads投稿が完成</strong></span>
+        </div>
+      </div>
+      <div class="t-key">自分の体験が、毎朝勝手に投稿になる</div>
+    </div>
+    <footer><span>18 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 17 — 事例⑤ Threads → note 横展開
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);padding-top:36px;padding-bottom:20px;">
+      <div>
+        <div class="case-badge">事例⑤</div>
+        <h2 class="t-h2" style="margin-bottom:4px;">Threads → note 横展開</h2>
+        <p class="t-h3">1つのネタから2つのコンテンツが自動で完成</p>
+      </div>
+      <div class="compare-grid" style="flex:1;align-items:start;">
+        <div class="flow" style="justify-content:start;">
+          <div class="flow-step" style="font-size:clamp(16px,1.8vw,24px);">
+            <span style="color:var(--gold);font-weight:700;">003_threads/posts.md</span><br>
+            <span style="color:var(--text-secondary);">一番いい投稿を1つ選ぶ</span>
+          </div>
+          <div class="flow-arrow" style="font-size:clamp(18px,2vw,28px);">↓</div>
+          <div class="flow-step" style="font-size:clamp(16px,1.8vw,24px);">
+            <span style="color:var(--accent-bright);font-weight:700;">note記事に自動で横展開</span>
+            <ul class="dot-list" style="margin-top:8px;gap:6px;">
+              <li style="font-size:clamp(15px,1.6vw,22px);">タイトル自動生成</li>
+              <li style="font-size:clamp(15px,1.6vw,22px);">本文を3〜5倍に深掘り</li>
+              <li style="font-size:clamp(15px,1.6vw,22px);">CTA（サービス誘導）も追加</li>
+            </ul>
+          </div>
+          <div class="flow-arrow" style="font-size:clamp(18px,2vw,28px);">↓</div>
+          <div class="flow-step" style="font-size:clamp(16px,1.8vw,24px);">
+            <span style="color:var(--text-secondary);">004_note/draft.md に保存</span>
+          </div>
+          <div class="flow-arrow" style="font-size:clamp(18px,2vw,28px);">↓</div>
+          <div class="flow-step" style="font-size:clamp(16px,1.8vw,24px);">
+            <span style="color:var(--olive-bright);font-weight:700;">⚙️ Coworkのスケジュールで自動実行</span><br>
+            <span style="color:var(--text-muted);font-size:clamp(13px,1.4vw,18px);">PCでnoteにログインしておくだけ</span>
+          </div>
+          <div class="flow-arrow" style="font-size:clamp(18px,2vw,28px);">↓</div>
+          <div class="flow-step accent" style="font-size:clamp(16px,1.8vw,24px);">
+            <span style="color:var(--accent-bright);font-weight:700;">📝 noteの下書きに自動で流し込まれる</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="ftree" style="font-size:clamp(15px,1.7vw,24px);line-height:1.9;">📁 作業フォルダ/
+├── 📁 001_profile/
+│   └── 📄 about-me.txt
+├── 📁 003_threads/
+│   └── 📄 posts.md
+└── 📁 <span class="nf">004_note/　← 自動で作成</span>
+    └── 📄 <span class="nf">draft.md　← ここに保存</span></div>
+          <div style="background:var(--slide-surface);border:1px solid var(--slide-border);border-radius:8px;padding:16px 18px;">
+            <p style="font-size:clamp(15px,1.7vw,22px);color:var(--text-secondary);line-height:1.7;">
+              フォルダに入れた<span class="em-pink">プロフィール・過去投稿</span>を読み込むことで、<br>あなたの文体・世界観が反映された記事になる
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="t-key">Threadsに書いたことが、自動でnoteの下書きになる</div>
+      <p style="text-align:center;font-size:clamp(16px,1.8vw,24px);color:var(--accent-bright);font-weight:700;margin-top:8px;">
+        📎 このスキルは本日の参加者にプレゼントします
+      </p>
+    </div>
+    <footer><span>19 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 15 — Part 1 Summary
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:var(--gap-md);">
+      <div>
+        <h2 class="t-h2 mb-sm">ここまでのまとめ</h2>
+        <p class="t-h3 mb-md">Claude Codeの5つの特徴</p>
+      </div>
+      <div class="sum-list" style="flex:1;justify-content:center;display:flex;flex-direction:column;">
+        <div class="sum-item">
+          <span class="sum-num">1</span>
+          <div class="sum-txt"><span class="em-pink">Chat型ではなくエージェント</span> — 指示するだけでやってくれる</div>
+        </div>
+        <div class="sum-item">
+          <span class="sum-num">2</span>
+          <div class="sum-txt"><span class="em-pink">ローカルで動く</span> — 自分のPCの中で作業</div>
+        </div>
+        <div class="sum-item">
+          <span class="sum-num">3</span>
+          <div class="sum-txt"><span class="em-pink">フォルダの中で作業する</span> — 中身次第で自分らしい結果に</div>
+        </div>
+        <div class="sum-item">
+          <span class="sum-num">4</span>
+          <div class="sum-txt"><span class="em-pink">他のツールと連携できる</span> — 仕事環境全体と繋がる</div>
+        </div>
+        <div class="sum-item">
+          <span class="sum-num">5</span>
+          <div class="sum-txt"><span class="em-pink">スキルを作って自動化できる</span> — 一度作れば毎日勝手に動く</div>
+        </div>
+      </div>
+      <div class="t-key">一度教えれば、あなたの仕事を覚えて自動でやってくれるAI</div>
+      <p style="font-size:clamp(19px,2.1vw,28px);color:var(--olive-bright);font-weight:600;margin-top:14px;">→ では、実際に導入してみましょう</p>
+    </div>
+    <footer><span>20 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       Slide 20 — Part 3 Title
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="deco"></div>
+    <div class="body" style="align-items:center;justify-content:center;text-align:center;gap:var(--gap-lg);">
+      <div>
+        <p style="font-family:var(--font-en-sans);font-size:16px;color:var(--olive-bright);letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;">PART 3</p>
+        <h1 class="t-h1" style="font-size:clamp(42px,5.5vw,78px);margin-bottom:22px;">Claude Codeを導入する</h1>
+        <p class="t-h3" style="font-size:clamp(22px,2.6vw,38px);">〜セットアップを完了させる〜</p>
+      </div>
+    </div>
+    <footer><span>21 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 22 — Part 4 Title
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="deco"></div>
+    <div class="body" style="align-items:center;justify-content:center;text-align:center;gap:var(--gap-lg);">
+      <div>
+        <p style="font-family:var(--font-en-sans);font-size:16px;color:var(--olive-bright);letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;">PART 4</p>
+        <h1 class="t-h1" style="font-size:clamp(42px,5.5vw,78px);margin-bottom:22px;">ハンズオン</h1>
+        <p class="t-h3" style="font-size:clamp(22px,2.6vw,38px);">Threadsの自動投稿作成</p>
+      </div>
+    </div>
+    <footer><span>22 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 21 — Skill types
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="body" style="gap:10px;padding-top:28px;padding-bottom:14px;overflow-y:auto;">
+      <div>
+        <h2 class="t-h2" style="margin-bottom:4px;">スキルの種類</h2>
+        <p class="t-h3">Claude Code のスキルには2種類あります</p>
+      </div>
+
+      <div class="compare-grid" style="flex-shrink:0;">
+        <!-- グローバルスキル -->
+        <div class="card">
+          <div class="card-label global">GLOBAL SKILL</div>
+          <div class="card-title">グローバルスキル</div>
+          <div class="card-desc">パソコン全体で使えるスキル。どのフォルダを開いていても呼び出せる。</div>
+          <div class="diagram">
+            <div class="pc-box">
+              <div class="pc-label">💻 あなたのパソコン全体</div>
+              <div class="pc-inside">
+                <div class="skill-home">
+                  <div class="skill-home-title">~/.claude/skills/</div>
+                  <div class="skill-file">📄 mail-reply.md<br>📄 sns-post.md<br>📄 summary.md</div>
+                </div>
+                <div class="arrows-out">
+                  <div class="arrow-row"><span class="ar">→</span><span class="folder-chip">📁 仕事フォルダ</span><span>で使える</span></div>
+                  <div class="arrow-row"><span class="ar">→</span><span class="folder-chip">📁 個人フォルダ</span><span>でも使える</span></div>
+                  <div class="arrow-row"><span class="ar">→</span><span class="folder-chip">📁 testフォルダ</span><span>でも使える</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="feature-list">
+            <li><span class="dot gold"></span>どのフォルダでも使える</li>
+            <li><span class="dot gold"></span>パソコン全体に保存される</li>
+            <li><span class="dot gold"></span>サイドバーには表示されない</li>
+            <li><span class="dot gold"></span>汎用的なスキルに向いている</li>
+          </ul>
+        </div>
+
+        <!-- プロジェクトスキル -->
+        <div class="card">
+          <div class="card-label project">PROJECT SKILL</div>
+          <div class="card-title">プロジェクトスキル</div>
+          <div class="card-desc">そのフォルダの中だけで使えるスキル。フォルダを開いた時だけ使える。</div>
+          <div class="diagram">
+            <div class="proj-box">
+              <div class="proj-label">📁 作業フォルダの中</div>
+              <div class="proj-folder">
+                <div class="proj-folder-name">📁 test/</div>
+                <div class="proj-inner">
+                  <div class="proj-inner-folder">
+                    <div class="proj-inner-folder-title">.claude/commands/</div>
+                    <div class="proj-inner-file">📄 threads-post.md<br>📄 mail-reply.md</div>
+                  </div>
+                  <div class="proj-inner-folder" style="border-color:rgba(255,255,255,.1)">
+                    <div class="proj-inner-folder-title" style="color:var(--text-muted)">001_profile/</div>
+                    <div class="proj-inner-file">📄 about-me.txt</div>
+                  </div>
+                </div>
+              </div>
+              <div class="proj-note">このフォルダを開いた時だけ使える</div>
+            </div>
+          </div>
+          <ul class="feature-list">
+            <li><span class="dot olive"></span>このフォルダの中だけで使える</li>
+            <li><span class="dot olive"></span>.claude/commandsに保存される</li>
+            <li><span class="dot olive"></span>サイドバーに表示される ✅</li>
+            <li><span class="dot olive"></span>フォルダごとに管理しやすい</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 使い分けガイド -->
+      <div class="guide-box" style="flex-shrink:0;">
+        <div class="guide-title">どちらを使う？</div>
+        <div class="guide-grid">
+          <div class="guide-item global">
+            <div class="guide-item-title">グローバルスキルが向いている場面</div>
+            <div class="guide-item-text">どの仕事でも繰り返し使うスキル<br>例：メール返信・議事録作成・要約など<br>フォルダを問わず使いたい時</div>
+          </div>
+          <div class="guide-item project">
+            <div class="guide-item-title">プロジェクトスキルが向いている場面</div>
+            <div class="guide-item-text">特定のフォルダ専用のスキル<br>例：このフォルダのプロフィールを使ったThreads投稿<br>今日のハンズオンはこちら ✅</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 指示文サンプル -->
+      <div class="cmd-box" style="flex-shrink:0;">
+        <div class="cmd-title">Claude Codeへの指示文</div>
+        <div class="cmd-row">
+          <div class="cmd-item global">
+            <div class="cmd-item-label">GLOBAL SKILL（グローバル）</div>
+            <div class="cmd-code">今やった作業をスキル化して<br>グローバルスキルで保存して</div>
+            <div class="cmd-note">どこからでも使いたい時</div>
+          </div>
+          <div class="cmd-item project">
+            <div class="cmd-item-label">PROJECT SKILL（プロジェクト）</div>
+            <div class="cmd-code">今やった作業をスキル化して<br>プロジェクトスキルで保存して</div>
+            <div class="cmd-note">このフォルダ専用にしたい時 ✅</div>
+          </div>
+        </div>
+        <div class="skill-summary">
+          今日のハンズオンでは「プロジェクトスキル」を使います<br>
+          <span style="font-size:13px;font-weight:400;color:var(--text-secondary);">→ .claude/commands/フォルダの中に保存されます</span>
+        </div>
+      </div>
+    </div>
+    <footer><span>23 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       Slide 23 — Part 5 Title
+  ══════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="deco"></div>
+    <div class="body" style="align-items:center;justify-content:center;text-align:center;gap:var(--gap-lg);">
+      <div>
+        <p style="font-family:var(--font-en-sans);font-size:16px;color:var(--olive-bright);letter-spacing:.22em;text-transform:uppercase;margin-bottom:20px;">PART 5</p>
+        <h1 class="t-h1" style="font-size:clamp(42px,5.5vw,78px);margin-bottom:22px;">まとめ・Q&amp;A</h1>
+        <p class="t-h3" style="font-size:clamp(22px,2.6vw,38px);">〜明日からの活用へ〜</p>
+      </div>
+    </div>
+    <footer><span>24 / 24</span><span>Claude Code はじめの一歩</span></footer>
+  </div>
+
+</div>
+
+<script>
+  function scaleDeck() {
+    const deck = document.getElementById('deck');
+    const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 800);
+    deck.style.transform = `scale(${scale})`;
+    deck.style.transformOrigin = 'center center';
+  }
+  window.addEventListener('resize', scaleDeck);
+  scaleDeck();
+
+  function autoFitSlide10() {
+    const body = document.querySelectorAll('.slide')[9].querySelector('.body');
+    const inner = document.getElementById('s10-content');
+    if (!inner || !body) return;
+    inner.style.transform = '';
+    inner.style.width = '100%';
+    const availH = body.clientHeight;
+    const naturalH = inner.scrollHeight;
+    if (naturalH > availH) {
+      const scale = availH / naturalH;
+      inner.style.transform = `scale(${scale})`;
+      inner.style.transformOrigin = 'top left';
+      inner.style.width = (100 / scale) + '%';
+    }
+  }
+  window.addEventListener('resize', autoFitSlide10);
+  window.addEventListener('load', autoFitSlide10);
+  setTimeout(autoFitSlide10, 500);
+
+  const slides = document.querySelectorAll('.slide');
+  let cur = 0;
+
+  function go(n) {
+    slides[cur].classList.remove('active');
+    cur = (n + slides.length) % slides.length;
+    slides[cur].classList.add('active');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+  });
+
+  document.addEventListener('click', () => go(cur + 1));
+</script>
+</body>
+</html>
